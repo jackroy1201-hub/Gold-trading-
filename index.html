@@ -1,183 +1,161 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roman System • GOLD AI 15M</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Roman System • Mobile Gold</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #06090c;
-      color: #e0d6c0; font-family: 'Segoe UI', Roboto, sans-serif;
-      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { 
+      background: #000; color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+      height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
     }
     
-    /* 1. Large TradingView Chart (70% Height) */
-    #tvchart { flex-grow: 1; width: 100%; border-bottom: 3px solid #1e222d; }
+    /* موبائل پر چارٹ کا سائز (زوم کی ضرورت نہیں) */
+    #tvchart { flex-grow: 1; width: 100%; height: 75vh; }
 
-    /* 2. Control & Signal Panel (30% Height) */
-    .panel {
-      background: #0a0f16; height: 350px; padding: 15px;
-      display: flex; flex-direction: column; gap: 10px;
-      border-top: 2px solid #f1c40f; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    /* نیچے کا پینل جو موبائل سکرین پر فٹ آئے گا */
+    .mobile-panel { 
+      background: #0a0a0a; height: 25vh; padding: 10px; 
+      display: flex; flex-direction: column; justify-content: space-around;
+      border-top: 3px solid #f1c40f; box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
     }
 
-    .top-bar { display: flex; justify-content: space-between; align-items: center; }
-    .timer { 
-        color: #f1c40f; font-weight: bold; font-family: monospace; font-size: 1.2rem; 
-        background: rgba(241, 196, 15, 0.1); padding: 6px 15px; border-radius: 8px;
-        border: 1px solid rgba(241, 196, 15, 0.3);
+    .top-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .price-now { font-size: 1.8rem; font-weight: 900; color: #fff; }
+    .timer { font-size: 0.9rem; color: #f1c40f; font-weight: bold; background: #1a1a1a; padding: 2px 8px; border-radius: 4px; }
+
+    /* سگنل کا خانہ - بڑا اور واضح */
+    .sig-display-box { 
+      background: rgba(255,255,255,0.03); width: 100%; height: 60px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 12px; border: 1px solid #333; margin: 5px 0;
     }
+    .sig-text { font-size: 2.2rem; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; }
+    .buy { color: #2ecc71; text-shadow: 0 0 15px rgba(46, 204, 113, 0.4); }
+    .sell { color: #e74c3c; text-shadow: 0 0 15px rgba(231, 76, 60, 0.4); }
+    .wait { color: #444; }
 
-    .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; align-items: center; margin-top: 5px; }
-
-    .price-box { text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
-    .price-val { font-size: 4rem; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 0 15px rgba(255,255,255,0.1); }
-    
-    .sig-box { 
-      text-align: center; background: rgba(255,255,255,0.03); 
-      padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
-      min-height: 120px; display: flex; flex-direction: column; justify-content: center;
+    .target-row { display: flex; justify-content: space-between; gap: 10px; width: 100%; }
+    .target-box { 
+      flex: 1; background: #111; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #222;
     }
-    .sig-text { font-size: 3.5rem; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
-    .buy { color: #2ecc71; text-shadow: 0 0 30px rgba(46, 204, 113, 0.6); }
-    .sell { color: #e74c3c; text-shadow: 0 0 30px rgba(231, 76, 60, 0.6); }
-    .wait { color: #444; font-size: 1.8rem; }
+    .t-label { font-size: 0.6rem; color: #666; font-weight: bold; margin-bottom: 2px; }
+    .t-val { font-size: 1rem; font-weight: bold; }
 
-    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 5px; }
-    .metric-card { background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03); }
-    .m-label { font-size: 0.65rem; color: #666; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
-    .m-val { font-size: 1.1rem; font-weight: bold; color: #f7e3b2; }
-
-    .targets-row { 
-      display: flex; justify-content: space-around; margin-top: 5px; padding: 15px; 
-      background: rgba(46, 204, 113, 0.05); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);
-    }
+    .bottom-info { display: flex; justify-content: space-between; font-size: 0.65rem; color: #555; padding-top: 5px; }
   </style>
 </head>
 <body onclick="initAudio()">
 
   <div id="tvchart"></div>
 
-  <div class="panel">
-    <div class="top-bar">
-      <h2 style="font-size: 1.4rem; color: #f6d5a3;">✨ Roman System: GOLD AI</h2>
-      <div class="timer" id="cdTimer">CONNECTING...</div>
+  <div class="mobile-panel">
+    <div class="top-row">
+        <div>
+            <div style="font-size: 0.6rem; color: #888;">XAUUSD LIVE</div>
+            <div class="price-now" id="curPrice">0.00</div>
+        </div>
+        <div class="timer" id="cdTimer">00:00</div>
     </div>
 
-    <div class="main-grid">
-      <div class="price-box">
-        <div class="price-val" id="curPrice">0.00</div>
-        <div style="font-size:0.75rem; color:#888; margin-top:10px; font-weight: bold;">LIVE XAUUSD (USMAN LAB)</div>
-      </div>
-      
-      <div class="sig-box">
+    <div class="sig-display-box">
         <div id="sigDisplay" class="sig-text wait">SCANNING</div>
-        <div id="sigStatus" style="font-size: 0.7rem; color: #555; margin-top: 5px;">SIGNAL WILL LOCK ON CANDLE CLOSE</div>
-      </div>
     </div>
 
-    <div class="metrics">
-      <div class="metric-card"><div class="m-label">HTF TREND</div><div class="m-val" id="mTrend">SCANNING</div></div>
-      <div class="metric-card"><div class="m-label">RSI (14)</div><div class="m-val" id="mRSI">--</div></div>
-      <div class="metric-card"><div class="m-label">OB ZONE</div><div class="m-val" id="mOB">SEARCHING</div></div>
-      <div class="metric-card"><div class="m-label">SMC PHASE</div><div class="m-val" id="mSMC">ANALYSE</div></div>
+    <div class="target-row">
+        <div class="target-box">
+            <div class="t-label">TAKE PROFIT</div>
+            <div class="t-val" id="tpVal" style="color:#2ecc71;">--</div>
+        </div>
+        <div class="target-box">
+            <div class="t-label">STOP LOSS</div>
+            <div class="t-val" id="slVal" style="color:#e74c3c;">--</div>
+        </div>
+        <div class="target-box">
+            <div class="t-label">RSI (14)</div>
+            <div class="t-val" id="mRSI" style="color:#f7e3b2;">--</div>
+        </div>
     </div>
 
-    <div class="targets-row">
-      <div style="color:#2ecc71; font-weight:bold; font-size: 1.3rem;">TP: <span id="tpVal">--</span></div>
-      <div style="color:#e74c3c; font-weight:bold; font-size: 1.3rem;">SL: <span id="slVal">--</span></div>
+    <div class="bottom-info">
+        <span>ROMAN SYSTEM v4.0</span>
+        <span id="sigTime">SYNCED: --:--</span>
     </div>
   </div>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
-  // TradingView Widget for Usman Tesla Car compatibility
   new TradingView.widget({
     "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "15",
     "timezone": "Asia/Karachi", "theme": "dark", "style": "1",
-    "container_id": "tvchart", "hide_top_toolbar": false, "withdateranges": true,
-    "hide_side_toolbar": false, "details": true, "hotlist": true, "calendar": true
+    "container_id": "tvchart", "hide_top_toolbar": true, "save_image": false,
+    "hide_legend": true, "withdateranges": false, "backgroundColor": "#000000"
   });
 
-  let pHistory = [];
+  let pHistory = JSON.parse(localStorage.getItem('pHistory')) || [];
   let aCtx = null;
-  let signalLock = false; 
+  let hasLocked = false;
+
+  // موبائل بیک گراؤنڈ سے واپسی پر ڈیٹا ریکوری
+  window.onload = () => {
+    const saved = JSON.parse(localStorage.getItem('romanLockedSignal'));
+    if(saved) applyUI(saved.sig, saved.tp, saved.sl, saved.trend, saved.rsi, saved.time);
+  };
 
   function initAudio() { if(!aCtx) aCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  function beep(f) { if(!aCtx) return; const o=aCtx.createOscillator(), g=aCtx.createGain(); o.connect(g); g.connect(aCtx.destination); o.frequency.value=f; g.gain.value=0.1; o.start(); o.stop(aCtx.currentTime+0.5); }
 
-  function beep(f) {
-    if(!aCtx) return;
-    const o = aCtx.createOscillator(); const g = aCtx.createGain();
-    o.connect(g); g.connect(aCtx.destination);
-    o.frequency.value = f; g.gain.value = 0.12;
-    o.start(); o.stop(aCtx.currentTime + 0.6);
-  }
-
-  async function fetchPrice() {
+  async function fetchMarket() {
     try {
       const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT");
-      const d = await r.json();
-      const p = parseFloat(d.price);
+      const d = await r.json(); const p = parseFloat(d.price);
       document.getElementById("curPrice").innerText = p.toFixed(2);
-      pHistory.push(p);
-      if(pHistory.length > 200) pHistory.shift();
       
+      pHistory.push(p); if(pHistory.length > 100) pHistory.shift();
+      localStorage.setItem('pHistory', JSON.stringify(pHistory));
+
       const now = new Date();
-      const min = now.getMinutes();
-      const sec = now.getSeconds();
+      const min = now.getMinutes(), sec = now.getSeconds();
+      
+      // 15 منٹ ٹائمر لاجک
+      let nextMin = 15 - (min % 15);
+      document.getElementById("cdTimer").innerText = `${nextMin-1}:${59-sec < 10 ? '0'+(59-sec) : 59-sec}`;
 
-      // Countdown to next 15m candle close
-      let nextClose = 15 - (min % 15);
-      let dMin = nextClose - 1;
-      let dSec = 59 - sec;
-      document.getElementById("cdTimer").innerText = `NEXT SIGNAL: ${dMin < 10 ? '0'+dMin : dMin}:${dSec < 10 ? '0'+dSec : dSec}`;
-
-      // Logic: Update only at 00, 15, 30, 45 minutes
+      // ہر 15 منٹ پر سگنل اپ ڈیٹ اور لاک
       if (min % 15 === 0 && sec < 2) {
-        if (!signalLock) {
-          generateFinalSignal(p);
-          signalLock = true;
-        }
-      } else {
-        signalLock = false; 
-      }
-    } catch(e) { console.error("Data lag..."); }
+        if (!hasLocked) { executeLogic(p); hasLocked = true; }
+      } else { hasLocked = false; }
+    } catch(e) {}
   }
 
-  function generateFinalSignal(p) {
-    if(pHistory.length < 50) return;
-
+  function executeLogic(p) {
+    if(pHistory.length < 20) return;
     const rsi = calcRSI();
-    const ma50 = pHistory.slice(-50).reduce((a,b)=>a+b)/50;
-    const trend = p > ma50 ? "BULLISH" : "BEARISH";
-    const high = Math.max(...pHistory.slice(-60, -1));
-    const low = Math.min(...pHistory.slice(-60, -1));
+    const ma = pHistory.reduce((a,b)=>a+b)/pHistory.length;
+    const trend = p > ma ? "BULLISH" : "BEARISH";
+    const h = Math.max(...pHistory.slice(-30, -1)), l = Math.min(...pHistory.slice(-30, -1));
+    
+    let sig = (p <= l || rsi < 33) ? "BUY" : (p >= h || rsi > 67) ? "SELL" : (trend === "BULLISH" ? "BUY" : "SELL");
+    let tp = (sig === "BUY" ? p + 2.8 : p - 2.8).toFixed(2);
+    let sl = (sig === "BUY" ? p - 1.4 : p + 1.4).toFixed(2);
+    let time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    let sig = "WAIT";
-    // SMC Matrix Logic (Price Action + RSI Overbought/Oversold)
-    if (p <= (low + 0.1) || rsi < 30) sig = "BUY";
-    else if (p >= (high - 0.1) || rsi > 70) sig = "SELL";
-    else sig = (trend === "BULLISH") ? "BUY" : "SELL";
+    // سگنل کو لوکل میموری میں محفوظ کرنا تاکہ بیک گراؤنڈ میں رہے
+    const lockData = { sig, tp, sl, trend, rsi, time };
+    localStorage.setItem('romanLockedSignal', JSON.stringify(lockData));
 
-    // Update UI and Save Signal
-    const sDisplay = document.getElementById("sigDisplay");
-    sDisplay.innerText = sig;
-    sDisplay.className = "sig-text " + sig.toLowerCase();
-    
-    document.getElementById("mTrend").innerText = trend;
-    document.getElementById("mRSI").innerText = rsi.toFixed(1);
-    document.getElementById("mOB").innerText = sig === "BUY" ? "BULLISH OB" : "BEARISH OB";
-    document.getElementById("mSMC").innerText = (p >= high || p <= low) ? "CHoCH" : "BOS";
-    
-    // Risk Management (Adjusted for 15M Volatility)
-    const buffer = 3.0; 
-    document.getElementById("tpVal").innerText = (sig === "BUY" ? p + buffer : p - buffer).toFixed(2);
-    document.getElementById("slVal").innerText = (sig === "BUY" ? p - 1.5 : p + 1.5).toFixed(2);
-    
-    document.getElementById("sigStatus").innerText = `LOCKED AT ${new Date().toLocaleTimeString()}`;
-    
-    beep(sig === "BUY" ? 1100 : 550);
+    applyUI(sig, tp, sl, trend, rsi, time);
+    beep(sig === "BUY" ? 1000 : 500);
+  }
+
+  function applyUI(sig, tp, sl, trend, rsi, time) {
+    const sEl = document.getElementById("sigDisplay");
+    sEl.innerText = sig; sEl.className = "sig-text " + sig.toLowerCase();
+    document.getElementById("tpVal").innerText = tp;
+    document.getElementById("slVal").innerText = sl;
+    document.getElementById("mRSI").innerText = parseFloat(rsi).toFixed(0);
+    document.getElementById("sigTime").innerText = `LOCKED: ${time}`;
   }
 
   function calcRSI() {
@@ -189,7 +167,7 @@
     return 100 - (100/(1+(u/(d||1))));
   }
 
-  setInterval(fetchPrice, 1000);
+  setInterval(fetchMarket, 1000);
 </script>
 </body>
 </html>
