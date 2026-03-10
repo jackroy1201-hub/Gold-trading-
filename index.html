@@ -1,323 +1,195 @@
 <!DOCTYPE html>
-<html lang="ur" dir="rtl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ابو حمزہ گولڈ سگنل · ایڈوانسڈ الگورتھم</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Tahoma', system-ui, sans-serif; }
-        body { background: #0a0f16; color: #edf2f9; padding: 12px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .container { max-width: 500px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roman System • GOLD AI 15M</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #06090c;
+      color: #e0d6c0; font-family: 'Segoe UI', Roboto, sans-serif;
+      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+    }
+    
+    /* 1. Large TradingView Chart (70% Height) */
+    #tvchart { flex-grow: 1; width: 100%; border-bottom: 3px solid #1e222d; }
 
-        /* جدید کارڈ ڈیزائن */
-        .card { background: rgba(18, 28, 40, 0.85); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(56, 80, 107, 0.6); border-radius: 32px; padding: 20px 18px; box-shadow: 0 20px 35px -8px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,0,0.1) inset; }
-        .glass-panel { background: rgba(12, 22, 32, 0.7); backdrop-filter: blur(4px); border: 1px solid #2e475d; border-radius: 26px; padding: 16px; }
+    /* 2. Control & Signal Panel (30% Height) */
+    .panel {
+      background: #0a0f16; height: 350px; padding: 15px;
+      display: flex; flex-direction: column; gap: 10px;
+      border-top: 2px solid #f1c40f; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    }
 
-        .session-badge { background: #00b894; border-radius: 40px; padding: 10px 22px; font-weight: 600; font-size: 1rem; text-align: center; letter-spacing: 0.5px; border: 1px solid rgba(255,255,240,0.2); box-shadow: 0 6px 14px #00b89430; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; }
+    .timer { 
+        color: #f1c40f; font-weight: bold; font-family: monospace; font-size: 1.2rem; 
+        background: rgba(241, 196, 15, 0.1); padding: 6px 15px; border-radius: 8px;
+        border: 1px solid rgba(241, 196, 15, 0.3);
+    }
 
-        .tv-chart { height: 280px; border-radius: 34px; overflow: hidden; border: 1px solid #385067; background: #101826; }
+    .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; align-items: center; margin-top: 5px; }
 
-        .indicator-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin: 15px 0 5px; }
-        .indicator-pill { background: #1b2a38; border-radius: 60px; padding: 10px 20px; flex: 1 0 auto; text-align: center; border: 1px solid #3f5568; }
-        .indicator-pill .label { font-size: 0.7rem; color: #9bb5d4; display: block; margin-bottom: 6px; }
-        .indicator-pill .value { font-size: 1.4rem; font-weight: 800; letter-spacing: 0.5px; }
+    .price-box { text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
+    .price-val { font-size: 4rem; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 0 15px rgba(255,255,255,0.1); }
+    
+    .sig-box { 
+      text-align: center; background: rgba(255,255,255,0.03); 
+      padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
+      min-height: 120px; display: flex; flex-direction: column; justify-content: center;
+    }
+    .sig-text { font-size: 3.5rem; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
+    .buy { color: #2ecc71; text-shadow: 0 0 30px rgba(46, 204, 113, 0.6); }
+    .sell { color: #e74c3c; text-shadow: 0 0 30px rgba(231, 76, 60, 0.6); }
+    .wait { color: #444; font-size: 1.8rem; }
 
-        .meter-gold { background: #16232e; height: 16px; border-radius: 30px; border: 1px solid #3d5a73; overflow: hidden; margin: 15px 0 8px; }
-        .meter-fill { height: 100%; width: 50%; background: linear-gradient(90deg, #e73c3c, #f39c12, #2ecc71); transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 5px; }
+    .metric-card { background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03); }
+    .m-label { font-size: 0.65rem; color: #666; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+    .m-val { font-size: 1.1rem; font-weight: bold; color: #f7e3b2; }
 
-        .signal-flagship { background: #0f1e2b; border-radius: 48px; padding: 20px; border: 2px solid #3f5e79; transition: all 0.3s; }
-        .signal-flagship.bullish-active { background: #0b3f2e; border-color: #2ecc71; box-shadow: 0 0 18px #2ecc7180; }
-        .signal-flagship.bearish-active { background: #541e1e; border-color: #e74c3c; box-shadow: 0 0 18px #e74c3c80; }
-
-        .main-signal-label { font-size: 2.2rem; font-weight: 900; background: rgba(255,255,255,0.07); padding: 10px 40px; border-radius: 120px; display: inline-block; backdrop-filter: blur(8px); margin-bottom: 18px; }
-
-        .three-stats { display: flex; justify-content: space-around; background: #10212e; border-radius: 34px; padding: 18px 8px; border: 1px solid #385068; }
-        .stat-block { text-align: center; }
-        .stat-label { font-size: 0.7rem; color: #98aec6; }
-        .stat-number { font-size: 1.3rem; font-weight: 700; }
-
-        .expert-talk { background: #112433; border-radius: 28px; padding: 20px; border-right: 8px solid #f1c40f; font-size: 1rem; line-height: 1.7; margin: 18px 0 10px; border-left: 1px solid #3a5570; }
-
-        .sparkline-canvas { background: #0e1922; border-radius: 28px; width: 100%; height: 60px; margin: 12px 0; border: 1px solid #3d5c7a; }
-
-        .footnote { display: flex; justify-content: space-between; color: #5e7a97; font-size: 0.7rem; padding: 8px 6px; }
-    </style>
+    .targets-row { 
+      display: flex; justify-content: space-around; margin-top: 5px; padding: 15px; 
+      background: rgba(46, 204, 113, 0.05); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);
+    }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <!-- سیشن بار (بہتر) -->
-        <div class="session-badge" id="sessionBar">ASIAN SESSION 🌏</div>
+<body onclick="initAudio()">
 
-        <!-- ٹریڈنگ ویو چارٹ -->
-        <div class="tv-chart" id="gold_chart_container"></div>
+  <div id="tvchart"></div>
 
-        <!-- تکنیکی اشاریے (RSI / MA / Moment) -->
-        <div class="card">
-            <div class="indicator-grid">
-                <div class="indicator-pill"><span class="label">RSI (14)</span><span class="value" id="rsiValue">--</span></div>
-                <div class="indicator-pill"><span class="label">فاسٹ MA</span><span class="value" id="fastMa">--</span></div>
-                <div class="indicator-pill"><span class="label">سلو MA</span><span class="value" id="slowMa">--</span></div>
-            </div>
-            <!-- سنٹی مینٹ میٹر (فیصد) -->
-            <div class="meter-gold"><div class="meter-fill" id="sentimentPointer" style="width: 50%;"></div></div>
-            <div style="display: flex; justify-content: space-between; font-size:0.7rem; color:#99b5d4;">
-                <span>BEAR 📉</span><span>NEUTRAL ⚖️</span><span>BULL 📈</span>
-            </div>
-        </div>
-
-        <!-- ماسٹر سگنل کارڈ (حسب ذیل الگورتھم) -->
-        <div class="signal-flagship" id="signalMasterCard">
-            <div style="text-align: center;">
-                <span class="main-signal-label" id="masterSignalText">NEUTRAL</span>
-            </div>
-
-            <!-- قیمت، TP، SL -->
-            <div class="three-stats">
-                <div class="stat-block"><span class="stat-label">لائیو XAU</span><span class="stat-number" id="livePriceSpan">---</span></div>
-                <div class="stat-block"><span class="stat-label">ٹیک پرافٹ</span><span class="stat-number" style="color:#2ecc71;" id="tpSpan">--</span></div>
-                <div class="stat-block"><span class="stat-label">اسٹاپ لاس</span><span class="stat-number" style="color:#e74c3c;" id="slSpan">--</span></div>
-            </div>
-
-            <!-- منی چارٹ (اسپارک لائن) -->
-            <canvas id="miniChart" class="sparkline-canvas" width="400" height="60"></canvas>
-
-            <!-- ابو حمزہ ایڈوائس -->
-            <div class="expert-talk" id="adviceBox">
-                <strong style="color: #f1c40f;">🛡️ ابو حمزہ الگورتھم:</strong><br>
-                <span id="adviceMessage">مارکیٹ کا جائزہ لیا جا رہا ہے...</span>
-            </div>
-
-            <!-- فوٹر  -->
-            <div class="footnote">
-                <span id="liveTime">--:--:--</span>
-                <span>⚡ الگورتھم v2.0</span>
-            </div>
-        </div>
+  <div class="panel">
+    <div class="top-bar">
+      <h2 style="font-size: 1.4rem; color: #f6d5a3;">✨ Roman System: GOLD AI</h2>
+      <div class="timer" id="cdTimer">CONNECTING...</div>
     </div>
 
-    <!-- ٹریڈنگ ویو لائبریری -->
-    <script src="https://s3.tradingview.com/tv.js"></script>
-    <script>
-        (function() {
-            // === جدید الگورتھمک سیٹ اپ ===
-            const TV_CONTAINER = 'gold_chart_container';
-            new TradingView.widget({
-                autosize: true,
-                symbol: "OANDA:XAUUSD",
-                interval: "15",
-                timezone: "Asia/Karachi",
-                theme: "dark",
-                style: "1",
-                locale: "en",
-                hide_top_toolbar: true,
-                container_id: TV_CONTAINER
-            });
+    <div class="main-grid">
+      <div class="price-box">
+        <div class="price-val" id="curPrice">0.00</div>
+        <div style="font-size:0.75rem; color:#888; margin-top:10px; font-weight: bold;">LIVE XAUUSD (USMAN LAB)</div>
+      </div>
+      
+      <div class="sig-box">
+        <div id="sigDisplay" class="sig-text wait">SCANNING</div>
+        <div id="sigStatus" style="font-size: 0.7rem; color: #555; margin-top: 5px;">SIGNAL WILL LOCK ON CANDLE CLOSE</div>
+      </div>
+    </div>
 
-            // === گلوبل ویری ایبل ===
-            let priceHistory = [];                 // قیمتوں کی تاریخ (زیادہ سے زیادہ 50)
-            const MAX_HISTORY = 50;
-            let lastSignal = "NEUTRAL";
-            const alertSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    <div class="metrics">
+      <div class="metric-card"><div class="m-label">HTF TREND</div><div class="m-val" id="mTrend">SCANNING</div></div>
+      <div class="metric-card"><div class="m-label">RSI (14)</div><div class="m-val" id="mRSI">--</div></div>
+      <div class="metric-card"><div class="m-label">OB ZONE</div><div class="m-val" id="mOB">SEARCHING</div></div>
+      <div class="metric-card"><div class="m-label">SMC PHASE</div><div class="m-val" id="mSMC">ANALYSE</div></div>
+    </div>
 
-            // DOM عناصر
-            const sessionEl = document.getElementById('sessionBar');
-            const rsiEl = document.getElementById('rsiValue');
-            const fastMaEl = document.getElementById('fastMa');
-            const slowMaEl = document.getElementById('slowMa');
-            const sentimentPointer = document.getElementById('sentimentPointer');
-            const masterSignalText = document.getElementById('masterSignalText');
-            const livePriceSpan = document.getElementById('livePriceSpan');
-            const tpSpan = document.getElementById('tpSpan');
-            const slSpan = document.getElementById('slSpan');
-            const adviceMessage = document.getElementById('adviceMessage');
-            const liveTime = document.getElementById('liveTime');
-            const signalCard = document.getElementById('signalMasterCard');
-            const miniChartCanvas = document.getElementById('miniChart');
-            let canvasCtx = miniChartCanvas.getContext('2d');
+    <div class="targets-row">
+      <div style="color:#2ecc71; font-weight:bold; font-size: 1.3rem;">TP: <span id="tpVal">--</span></div>
+      <div style="color:#e74c3c; font-weight:bold; font-size: 1.3rem;">SL: <span id="slVal">--</span></div>
+    </div>
+  </div>
 
-            // === افعال برائے تکنیکی اشاریے ===
-            function simpleMovingAverage(data, period) {
-                if (data.length < period) return null;
-                const slice = data.slice(-period);
-                const sum = slice.reduce((acc, val) => acc + val, 0);
-                return sum / period;
-            }
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
+  // TradingView Widget for Usman Tesla Car compatibility
+  new TradingView.widget({
+    "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "15",
+    "timezone": "Asia/Karachi", "theme": "dark", "style": "1",
+    "container_id": "tvchart", "hide_top_toolbar": false, "withdateranges": true,
+    "hide_side_toolbar": false, "details": true, "hotlist": true, "calendar": true
+  });
 
-            function calculateRSI(data, period = 14) {
-                if (data.length < period + 1) return 50; // غیر جانبدار
-                let gains = 0, losses = 0;
-                for (let i = data.length - period; i < data.length; i++) {
-                    const diff = data[i] - data[i - 1];
-                    if (diff >= 0) gains += diff;
-                    else losses -= diff;
-                }
-                const avgGain = gains / period;
-                const avgLoss = losses / period;
-                if (avgLoss === 0) return 100;
-                const rs = avgGain / avgLoss;
-                return 100 - (100 / (1 + rs));
-            }
+  let pHistory = [];
+  let aCtx = null;
+  let signalLock = false; 
 
-            // اے ٹی آر (اوسط حقیقی رینج) کا تخمینہ — ہمارے پاس صرف قیمت ہے، لہٰذا مومینٹم وولاٹیلٹی
-            function estimateVolatility(data, period = 14) {
-                if (data.length < 2) return 1.0;
-                let sum = 0;
-                const start = Math.max(0, data.length - period);
-                for (let i = start + 1; i < data.length; i++) {
-                    sum += Math.abs(data[i] - data[i-1]);
-                }
-                const count = Math.min(period, data.length - 1);
-                return count > 0 ? sum / count : 1.0;
-            }
+  function initAudio() { if(!aCtx) aCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 
-            // === سیشن اپڈیٹ ===
-            function updateSession() {
-                const hr = new Date().getHours();
-                if (hr >= 3 && hr < 11) { sessionEl.innerText = "🌏 ASIAN SESSION · ایشیائی سیشن"; sessionEl.style.backgroundColor = "#00897b"; }
-                else if (hr >= 11 && hr < 19) { sessionEl.innerText = "🇪🇺 LONDON SESSION · لندن سیشن"; sessionEl.style.backgroundColor = "#1e5f8e"; }
-                else { sessionEl.innerText = "🇺🇸 NEW YORK SESSION · نیویارک سیشن"; sessionEl.style.backgroundColor = "#b13e3e"; }
-            }
+  function beep(f) {
+    if(!aCtx) return;
+    const o = aCtx.createOscillator(); const g = aCtx.createGain();
+    o.connect(g); g.connect(aCtx.destination);
+    o.frequency.value = f; g.gain.value = 0.12;
+    o.start(); o.stop(aCtx.currentTime + 0.6);
+  }
 
-            // === مینی چارٹ ڈرا ===
-            function drawSparkline(prices) {
-                if (!canvasCtx || prices.length < 2) return;
-                const w = miniChartCanvas.width, h = miniChartCanvas.height;
-                canvasCtx.clearRect(0, 0, w, h);
-                canvasCtx.strokeStyle = "#f1c40f";
-                canvasCtx.lineWidth = 2.5;
-                canvasCtx.beginPath();
-                const minP = Math.min(...prices.slice(-30));
-                const maxP = Math.max(...prices.slice(-30));
-                const range = maxP - minP || 1;
-                const recent = prices.slice(-30); // زیادہ سے زیادہ 30 points
-                recent.forEach((p, idx) => {
-                    const x = (idx / (recent.length - 1)) * w;
-                    const y = h - 5 - ((p - minP) / range) * (h - 20);
-                    if (idx === 0) canvasCtx.moveTo(x, y);
-                    else canvasCtx.lineTo(x, y);
-                });
-                canvasCtx.stroke();
-                // ڈاٹ انڈیکیٹر
-                canvasCtx.fillStyle = "#fff";
-                canvasCtx.beginPath();
-                canvasCtx.arc(w - 8, h - 5 - ((recent[recent.length-1] - minP) / range) * (h - 20), 4, 0, 2*Math.PI);
-                canvasCtx.fill();
-                canvasCtx.fillStyle = "#f1c40f";
-                canvasCtx.beginPath();
-                canvasCtx.arc(w - 8, h - 5 - ((recent[recent.length-1] - minP) / range) * (h - 20), 2.5, 0, 2*Math.PI);
-                canvasCtx.fill();
-            }
+  async function fetchPrice() {
+    try {
+      const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT");
+      const d = await r.json();
+      const p = parseFloat(d.price);
+      document.getElementById("curPrice").innerText = p.toFixed(2);
+      pHistory.push(p);
+      if(pHistory.length > 200) pHistory.shift();
+      
+      const now = new Date();
+      const min = now.getMinutes();
+      const sec = now.getSeconds();
 
-            // === مرکزی الگورتھم: ہر 3 سیکنڈ بعد لائیو اپڈیٹ ===
-            async function algorithmicUpdate() {
-                try {
-                    const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT');
-                    const data = await response.json();
-                    const currentPrice = parseFloat(data.price);
-                    if (isNaN(currentPrice)) return;
+      // Countdown to next 15m candle close
+      let nextClose = 15 - (min % 15);
+      let dMin = nextClose - 1;
+      let dSec = 59 - sec;
+      document.getElementById("cdTimer").innerText = `NEXT SIGNAL: ${dMin < 10 ? '0'+dMin : dMin}:${dSec < 10 ? '0'+dSec : dSec}`;
 
-                    // وقت کا ڈسپلے
-                    liveTime.innerText = new Date().toLocaleTimeString('ur-PK', {hour12: false}) + " UTC+5";
+      // Logic: Update only at 00, 15, 30, 45 minutes
+      if (min % 15 === 0 && sec < 2) {
+        if (!signalLock) {
+          generateFinalSignal(p);
+          signalLock = true;
+        }
+      } else {
+        signalLock = false; 
+      }
+    } catch(e) { console.error("Data lag..."); }
+  }
 
-                    // قیمت کی تاریخ میں اضافہ
-                    priceHistory.push(currentPrice);
-                    if (priceHistory.length > MAX_HISTORY) priceHistory.shift();
+  function generateFinalSignal(p) {
+    if(pHistory.length < 50) return;
 
-                    // لائیو قیمت دکھائیں
-                    livePriceSpan.innerText = currentPrice.toFixed(2);
+    const rsi = calcRSI();
+    const ma50 = pHistory.slice(-50).reduce((a,b)=>a+b)/50;
+    const trend = p > ma50 ? "BULLISH" : "BEARISH";
+    const high = Math.max(...pHistory.slice(-60, -1));
+    const low = Math.min(...pHistory.slice(-60, -1));
 
-                    // --- تکنیکی اشاریے ---
-                    const fastPeriod = 5, slowPeriod = 20, rsiPeriod = 14;
-                    const fastMA = simpleMovingAverage(priceHistory, fastPeriod);
-                    const slowMA = simpleMovingAverage(priceHistory, slowPeriod);
-                    const rsi = calculateRSI(priceHistory, rsiPeriod).toFixed(1);
+    let sig = "WAIT";
+    // SMC Matrix Logic (Price Action + RSI Overbought/Oversold)
+    if (p <= (low + 0.1) || rsi < 30) sig = "BUY";
+    else if (p >= (high - 0.1) || rsi > 70) sig = "SELL";
+    else sig = (trend === "BULLISH") ? "BUY" : "SELL";
 
-                    // MA ڈسپلے
-                    fastMaEl.innerText = fastMA ? fastMA.toFixed(2) : '--';
-                    slowMaEl.innerText = slowMA ? slowMA.toFixed(2) : '--';
-                    rsiEl.innerText = rsi;
+    // Update UI and Save Signal
+    const sDisplay = document.getElementById("sigDisplay");
+    sDisplay.innerText = sig;
+    sDisplay.className = "sig-text " + sig.toLowerCase();
+    
+    document.getElementById("mTrend").innerText = trend;
+    document.getElementById("mRSI").innerText = rsi.toFixed(1);
+    document.getElementById("mOB").innerText = sig === "BUY" ? "BULLISH OB" : "BEARISH OB";
+    document.getElementById("mSMC").innerText = (p >= high || p <= low) ? "CHoCH" : "BOS";
+    
+    // Risk Management (Adjusted for 15M Volatility)
+    const buffer = 3.0; 
+    document.getElementById("tpVal").innerText = (sig === "BUY" ? p + buffer : p - buffer).toFixed(2);
+    document.getElementById("slVal").innerText = (sig === "BUY" ? p - 1.5 : p + 1.5).toFixed(2);
+    
+    document.getElementById("sigStatus").innerText = `LOCKED AT ${new Date().toLocaleTimeString()}`;
+    
+    beep(sig === "BUY" ? 1100 : 550);
+  }
 
-                    // --- سگنل جنریشن (الگورتھمک) ---
-                    let signal = "NEUTRAL";
-                    let trendStrength = 50; // 0 to 100
-                    let advice = "";
-                    let tp, sl;
-                    const vol = estimateVolatility(priceHistory, 14); // volatility in dollars
+  function calcRSI() {
+    let u=0, d=0;
+    for(let i=pHistory.length-14; i<pHistory.length; i++) {
+      let diff = pHistory[i]-pHistory[i-1];
+      diff>0 ? u+=diff : d-=diff;
+    }
+    return 100 - (100/(1+(u/(d||1))));
+  }
 
-                    // اصول: فاسٹ ایم اے > سلو ایم اے اور RSI > 55 = bullish
-                    // فاسٹ ایم اے < سلو ایم اے اور RSI < 45 = bearish
-                    if (fastMA && slowMA) {
-                        if (fastMA > slowMA && rsi > 55) {
-                            signal = "BULLISH 📈";
-                            trendStrength = 70 + Math.min(25, (rsi - 55) * 2);
-                            advice = "فاسٹ ماونگ ایوریج نے سلو کو اوپر کاٹا ہے۔ RSI مضبوط خرید زون میں۔";
-                            tp = (currentPrice + vol * 2.2).toFixed(2);
-                            sl = (currentPrice - vol * 1.1).toFixed(2);
-                        } else if (fastMA < slowMA && rsi < 45) {
-                            signal = "BEARISH 📉";
-                            trendStrength = 25 - Math.max(0, (45 - rsi) * 1.5);
-                            if (trendStrength < 5) trendStrength = 5;
-                            advice = "سلو ایم اے اوپر ہے اور RSI کمزوری دکھا رہا ہے۔ فروخت کا دباؤ۔";
-                            tp = (currentPrice - vol * 2.0).toFixed(2);
-                            sl = (currentPrice + vol * 1.2).toFixed(2);
-                        } else {
-                            signal = "NEUTRAL ⚖️";
-                            trendStrength = 50;
-                            advice = "مارکیٹ میں وضاحت نہیں۔ بہتر ہے انتظار کریں۔";
-                            tp = sl = "--";
-                        }
-                    } else {
-                        advice = "ڈیٹا جمع ہو رہا ہے...";
-                        tp = sl = "--";
-                    }
-
-                    // سگنل تبدیل ہونے پر آواز
-                    if (lastSignal !== signal && signal !== "NEUTRAL ⚖️") {
-                        alertSound.play().catch(e => {});
-                        lastSignal = signal;
-                    } else {
-                        lastSignal = signal;
-                    }
-
-                    // یو آئی اپڈیٹس
-                    masterSignalText.innerText = signal;
-                    tpSpan.innerText = tp !== "--" ? tp : "--";
-                    slSpan.innerText = sl !== "--" ? sl : "--";
-                    adviceMessage.innerText = advice + (fastMA ? ` (MA_fast: ${fastMA.toFixed(2)} / MA_slow: ${slowMA.toFixed(2)})` : '');
-
-                    // سینٹی مینٹ پوائنٹر (0-100)
-                    let pointerWidth = Math.min(100, Math.max(0, trendStrength));
-                    sentimentPointer.style.width = pointerWidth + "%";
-
-                    // کارڈ کا موڈ (bullish/bearish)
-                    signalCard.classList.remove('bullish-active', 'bearish-active');
-                    if (signal.includes('BULLISH')) signalCard.classList.add('bullish-active');
-                    else if (signal.includes('BEARISH')) signalCard.classList.add('bearish-active');
-
-                    // منی چارٹ ڈرا
-                    drawSparkline(priceHistory);
-
-                } catch (err) {
-                    console.warn("الگورتھم اپڈیٹ میں خرابی:", err);
-                }
-            }
-
-            // وقفہ اور ابتدائی کال
-            setInterval(algorithmicUpdate, 3000);
-            setInterval(updateSession, 60000);
-            algorithmicUpdate();
-            updateSession();
-
-            // کینوس ریسپانسیو کے لیے (چوڑائی طے کریں)
-            function resizeCanvas() {
-                const containerWidth = document.querySelector('.sparkline-canvas').clientWidth;
-                miniChartCanvas.width = containerWidth;
-                miniChartCanvas.height = 60;
-                drawSparkline(priceHistory);
-            }
-            window.addEventListener('resize', resizeCanvas);
-            setTimeout(resizeCanvas, 200);
-        })();
-    </script>
+  setInterval(fetchPrice, 1000);
+</script>
 </body>
 </html>
